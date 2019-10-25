@@ -29,7 +29,7 @@ if not os.path.exists(file1):
 if not os.path.exists(file2):
     os.system("curl -O %s"%(url2))
 
-with gzip.open(file1,"r") as fh:
+with gzip.open(file1,"rt") as fh:
     seqs = aspairs(fh)
 
     for seq in seqs:
