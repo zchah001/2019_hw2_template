@@ -6,7 +6,7 @@
 gff="Escherichia_coli_str_k_12_substr_mg1655.ASM584v2.37.gff3.gz"
 fasta="Escherichia_coli_str_k_12_substr_mg1655.ASM584v2.dna.chromosome.Chromosome.fa.gz"
 
-import os,gzip,itertools
+import os,gzip,itertools,csv,re
 
 # this is code which will parse FASTA files
 # define what a header looks like in FASTA format
@@ -32,7 +32,12 @@ if not os.path.exists(gff):
 if not os.path.exists(fasta):
     os.system("curl -O ftp://ftp.ensemblgenomes.org/pub/bacteria/release-45/fasta/bacteria_0_collection/escherichia_coli_str_k_12_substr_mg1655/dna/Escherichia_coli_str_k_12_substr_mg1655.ASM584v2.dna.chromosome.Chromosome.fa.gz")
     
-with gzip.open(gff,"r") as fh:
+with gzip.open(gff,"rt") as fh:
     # now add code to process this
-    # data such as
-    # for line in fh:
+    gff = csv.reader(fh,delimiter="\t")
+    for row in gff:
+#        print(row)
+        print(row[3],row[6])
+        m = re.match('Chr',row[0])
+        if m:
+            print("line matches",row[0])
