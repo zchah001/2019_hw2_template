@@ -1,38 +1,30 @@
-#!/usr/bin/env python
+#!/usr/bin/env/python
 
-import os, gzip, itertools
+import sys
 
-# this is code which will parse FASTA files
-# define what a header looks like in FASTA format
-def isheader(line):
-    return line[0] == '>'
+def process_fasta(fasta):
+	with open(fasta, 'r') as f:
+		genes = 0
+		seq = []
+		for i in f:
+			if i.startswith(">"):
+				genes += 1
+			else:
+				i = i.rstrip("\n")
+				seq.append(i)
 
-def aspairs(f):
-    seq_id = ''
-    sequence = ''
-    for header,group in itertools.groupby(f, isheader):
-        if header:
-            line = next(group)
-            seq_id = line[1:].split()[0]
-        else:
-            sequence = ''.join(line.strip() for line in group)
-            yield seq_id, sequence
+		seq = ''.join(seq)
+		l = sum(len(i) for i in (seq))
 
-url1="ftp://ftp.ensemblgenomes.org/pub/bacteria/release-45/fasta/bacteria_0_collection/salmonella_enterica_subsp_enterica_serovar_typhimurium_str_lt2/cds/Salmonella_enterica_subsp_enterica_serovar_typhimurium_str_lt2.ASM694v2.cds.all.fa.gz"
-url2="ftp://ftp.ensemblgenomes.org/pub/bacteria/release-45/fasta/bacteria_0_collection/mycobacterium_tuberculosis_h37rv/cds/Mycobacterium_tuberculosis_h37rv.ASM19595v2.cds.all.fa.gz"
-file1="Salmonella_enterica_subsp_enterica_serovar_typhimurium_str_lt2.ASM694v2.cds.all.fa.gz"
-file2="Mycobacterium_tuberculosis_h37rv.ASM19595v2.cds.all.fa.gz"
+		GC = 0
+		for i in seq:
+			if i == 'G' or i == 'C':
+				GC += 1
+		GCpercent = [str(round(GC/l*100, 2)),"%"]
+		GCpercent = ''.join(GCpercent)
+		TotalCodons = round(l/3)
 
-if not os.path.exists(file1):
-    os.system("curl -O %s"%(url1))
+		return genes, l, GCpercent, TotalCodons
 
-if not os.path.exists(file2):
-    os.system("curl -O %s"%(url2))
-
-with gzip.open(file1,"rt") as fh:
-    seqs = aspairs(fh)
-
-    for seq in seqs:
-        seqname  = seq[0]
-        seqstring= seq[1]
-        print(seqname, " first 10 bases are ", seqstring[0:10])
+genes, l, GCpercent, TotalCodons = process_fasta(sys.argv[1])
+print("\n","Number of genes = %s"%genes,"\n","Total nucleotides = %s"%l,"\n","GC content = %s"%GCpercent,"\n","Total codons = %s"%TotalCodons,"\n")
